@@ -42,5 +42,5 @@ jobs:
         run: |
           mvn sonar:sonar \
             -Dsonar.projectKey=Rasindu99_sonarqube-lab02 \
-            -Dsonar.organization=SandeepRGR214182C \
+            -Dsonar.organization=sandeeprgr214182c \
             -Dsonar.host.url=https://sonarcloud.io
