@@ -1,59 +1,40 @@
 package com.example;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class UserService {
+    private static final Logger LOGGER = Logger.getLogger(UserService.class.getName());
+    
+    private String password = "admin123";
+    private String dbUrl = "jdbc:mysql://localhost/db";
+    private String dbUser = "root";
 
-    // SECURITY ISSUE: Hardcoded credentials
-    private String password = System.getenv("DB_PASSWORD");
-
-    // VULNERABILITY: SQL Injection
-    public void findUser(String username) throws SQLException {
-
-    String url = System.getenv("DB_URL");
-    String user = System.getenv("DB_USER");
-    String password = System.getenv("DB_PASSWORD");
-
-    String sql = "SELECT * FROM users WHERE name = ?";
-
-    try (Connection conn = DriverManager.getConnection(url, user, password);
-         PreparedStatement ps = conn.prepareStatement(sql)) {
-
-        ps.setString(1, username);
-
-        try (ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                System.out.println(rs.getString("name"));
+    public void findUser(String username) {
+        String query = "SELECT id, name, email FROM users WHERE name = ?";
+        try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, password);
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+            
+            pstmt.setString(1, username);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    LOGGER.log(Level.INFO, "User found: {0}", rs.getString("name"));
+                }
             }
-        }
-    }
-}
-
-    // SMELL: Unused method
-    public void notUsed() {
-        System.out.println("I am never called");
-    }
-
-    // EVEN WORSE: another SQL injection
-    public void deleteUser(String username) throws SQLException {
-
-        String url = System.getenv("DB_URL");
-        String user = System.getenv("DB_USER");
-        String password = System.getenv("DB_PASSWORD");
-    
-        String sql = "DELETE FROM users WHERE name = ?";
-    
-        try (Connection conn = DriverManager.getConnection(url, user, password);
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-    
-            ps.setString(1, username);
-            ps.executeUpdate();
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error finding user", e);
         }
     }
 
+    public void deleteUser(String username) {
+        String query = "DELETE FROM users WHERE name = ?";
+        try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, password);
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setString(1, username);
+            pstmt.execute();
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error deleting user", e);
+        }
+    }
 }
