@@ -12,6 +12,11 @@ jobs:
     name: Build and Analyze
     runs-on: ubuntu-latest
 
+    env:
+      DB_URL: jdbc:mysql://localhost/db
+      DB_USER: root
+      DB_PASSWORD: password
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
